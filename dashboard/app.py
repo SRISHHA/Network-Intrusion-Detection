@@ -121,12 +121,12 @@ with gr.Blocks() as demo:
         label="Attack Distribution"
     )
 
-    attack_plot = gr.Plot(
-        label=" "
-    )
-
     recent_table = gr.Dataframe(
         label="Recent Predictions"
+    )
+
+    attack_plot = gr.Plot(
+        
     )
 
     
