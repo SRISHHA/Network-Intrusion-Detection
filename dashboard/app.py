@@ -139,7 +139,7 @@ with gr.Blocks() as demo:
     )
 
     refresh_btn.click(
-    fn=attack_chart,
+    fn=attack_chart
     )
 
     demo.load(
@@ -154,7 +154,7 @@ with gr.Blocks() as demo:
     )
 
     demo.load(
-        fn=attack_chart,
+        fn=attack_chart
     )
 
 demo.launch(
