@@ -64,6 +64,21 @@ with gr.Blocks() as demo:
         ]
     )
 
+    attack_counts = (
+    df[df["prediction"] == "Attack"]["attack_type"]
+    .value_counts()
+    .reset_index()
+    )
+
+    attack_counts.columns = ["Attack Type", "Count"]
+
+    gr.BarPlot(
+    value=attack_counts,
+    x="Attack Type",
+    y="Count",
+    title="Attack Distribution"
+    )
+
 demo.launch(
     server_name="0.0.0.0",
     server_port=7860

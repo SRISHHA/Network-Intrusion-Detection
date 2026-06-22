@@ -5,6 +5,7 @@ import pandas as pd
 
 from datetime import datetime
 from kafka import KafkaConsumer
+from datetime import datetime
 
 # ==================================
 # Load Models
@@ -76,7 +77,12 @@ print("Waiting for messages...")
 
 os.makedirs("logs", exist_ok=True)
 
-csv_file = "logs/predictions.csv"
+
+
+csv_file = (
+    f"logs/predictions_"
+    f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+)
 
 if not os.path.exists(csv_file):
 
