@@ -121,9 +121,15 @@ with gr.Blocks() as demo:
         label="Attack Distribution"
     )
 
+    attack_plot = gr.Plot(
+        label="Attack Distribution Chart"
+    )
+
     recent_table = gr.Dataframe(
         label="Recent Predictions"
     )
+
+    
 
     
 
@@ -139,7 +145,9 @@ with gr.Blocks() as demo:
     )
 
     refresh_btn.click(
-    fn=attack_chart
+    fn=attack_chart,
+    outputs=attack_plot
+
     )
 
     demo.load(
@@ -154,7 +162,8 @@ with gr.Blocks() as demo:
     )
 
     demo.load(
-        fn=attack_chart
+        fn=attack_chart,
+        outputs=attack_plot
     )
 
 demo.launch(
