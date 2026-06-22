@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import time
-
 from kafka import KafkaProducer
 
 producer = KafkaProducer(
@@ -15,16 +14,16 @@ producer = KafkaProducer(
 
 df = pd.read_csv("data/UNSW_NB15_training-set.csv")
 
-# Remove target columns
 df = df.drop(
     columns=["label", "attack_cat"],
     errors="ignore"
 )
 
-# Testing only
-df = df.head(50)
+count = 0
 
 while True:
+
+    print("Starting dataset stream...")
 
     for _, row in df.iterrows():
 
@@ -33,9 +32,12 @@ while True:
             row.to_dict()
         )
 
-        producer.flush()
+        count += 1
 
-        time.sleep(1)
+        print(f"Sent record #{count}")
 
-print("All records sent successfully")
+        time.sleep(0.5)
 
+    producer.flush()
+
+    print("Dataset completed. Restarting...")
