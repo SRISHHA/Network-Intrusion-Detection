@@ -24,19 +24,18 @@ df = df.drop(
 # Testing only
 df = df.head(50)
 
-for index, row in df.iterrows():
+while True:
 
-    future = producer.send(
-        "network_logs",
-        row.to_dict()
-    )
+    for _, row in df.iterrows():
 
-    future.get(timeout=10)
+        producer.send(
+            "network_logs",
+            row.to_dict()
+        )
 
-    print(f"Sent record {index+1}")
+        producer.flush()
 
-    time.sleep(1)
-
-producer.flush()
+        time.sleep(1)
 
 print("All records sent successfully")
+
