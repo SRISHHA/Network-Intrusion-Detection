@@ -122,7 +122,7 @@ with gr.Blocks() as demo:
     )
 
     attack_plot = gr.Plot(
-        label="Attack Distribution Chart"
+        label=" "
     )
 
     recent_table = gr.Dataframe(
