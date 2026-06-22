@@ -6,6 +6,9 @@ import pandas as pd
 from datetime import datetime
 from kafka import KafkaConsumer
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
 
 # ==================================
 # Load Models
@@ -77,12 +80,18 @@ print("Waiting for messages...")
 
 os.makedirs("logs", exist_ok=True)
 
-
+ist_time = datetime.now(
+    ZoneInfo("Asia/Kolkata")
+)
 
 csv_file = (
     f"logs/predictions_"
-    f"{datetime.now().strftime('%Y-%m-%d_%I-%M-%S_%p')}.csv"
+    f"{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 )
+
+timestamp = datetime.now(
+    ZoneInfo("Asia/Kolkata")
+).strftime("%Y-%m-%d %H:%M:%S")
 
 if not os.path.exists(csv_file):
 
