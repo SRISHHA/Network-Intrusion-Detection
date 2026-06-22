@@ -145,21 +145,21 @@ with gr.Blocks() as demo:
     outputs=attack_plot
     )
 
-demo.load(
-    fn=load_data,
-    outputs=[
-        current_file,
-        total_packets,
-        total_attacks,
-        attack_table,
-        recent_table
-    ]
-)
+    demo.load(
+        fn=load_data,
+        outputs=[
+            current_file,
+            total_packets,
+            total_attacks,
+            attack_table,
+            recent_table
+        ]
+    )
 
-demo.load(
-    fn=attack_chart,
-    outputs=attack_plot
-)
+    demo.load(
+        fn=attack_chart,
+        outputs=attack_plot
+    )
 
 demo.launch(
     server_name="0.0.0.0",
