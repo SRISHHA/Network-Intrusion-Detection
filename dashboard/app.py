@@ -2,7 +2,7 @@ import os
 import glob
 import pandas as pd
 import gradio as gr
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 
 def get_latest_csv():
@@ -57,6 +57,9 @@ def load_data():
         attack_counts,
         recent
     )
+import plotly.express as px
+
+
 def attack_chart():
 
     csv_file = get_latest_csv()
@@ -66,33 +69,30 @@ def attack_chart():
 
     df = pd.read_csv(csv_file)
 
-    attacks = df[df["prediction"] == "Attack"]
-
-    fig, ax = plt.subplots()
-
-    if len(attacks) == 0:
-
-        ax.text(
-            0.5,
-            0.5,
-            "No Attacks Detected",
-            ha="center"
-        )
-
-        return fig
-
-    counts = attacks["attack_type"].value_counts()
-
-    counts.plot(
-        kind="bar",
-        ax=ax
+    counts = (
+        df["attack_type"]
+        .value_counts()
+        .reset_index()
     )
 
-    ax.set_title(
-        "Attack Distribution"
+    counts.columns = [
+        "Type",
+        "Count"
+    ]
+
+    fig = px.bar(
+        counts,
+        x="Type",
+        y="Count",
+        title="Network Traffic Classification",
+        text="Count"
     )
 
-    ax.set_ylabel("Count")
+    fig.update_layout(
+        xaxis_title="Traffic Type",
+        yaxis_title="Count",
+        height=450
+    )
 
     return fig
 
