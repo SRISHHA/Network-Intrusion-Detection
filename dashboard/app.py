@@ -37,11 +37,12 @@ def load_data():
         recent
     )
 
+
 with gr.Blocks() as demo:
 
     gr.Markdown("# 🚨 Real-Time Intrusion Detection Dashboard")
 
-    btn = gr.Button("Refresh")
+    refresh_btn = gr.Button("Refresh")
 
     total_packets = gr.Number(label="Total Packets")
     total_attacks = gr.Number(label="Total Attacks")
@@ -54,29 +55,14 @@ with gr.Blocks() as demo:
         label="Recent Predictions"
     )
 
-    btn.click(
-        load_data,
+    refresh_btn.click(
+        fn=load_data,
         outputs=[
             total_packets,
             total_attacks,
             attack_table,
             recent_table
         ]
-    )
-
-    attack_counts = (
-    df[df["prediction"] == "Attack"]["attack_type"]
-    .value_counts()
-    .reset_index()
-    )
-
-    attack_counts.columns = ["Attack Type", "Count"]
-
-    gr.BarPlot(
-    value=attack_counts,
-    x="Attack Type",
-    y="Count",
-    title="Attack Distribution"
     )
 
 demo.launch(
