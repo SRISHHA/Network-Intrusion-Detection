@@ -2,6 +2,7 @@ import os
 import glob
 import pandas as pd
 import gradio as gr
+import matplotlib.pyplot as plt
 
 
 def get_latest_csv():
@@ -67,9 +68,20 @@ def attack_chart():
 
     attacks = df[df["prediction"] == "Attack"]
 
-    counts = attacks["attack_type"].value_counts()
-
     fig, ax = plt.subplots()
+
+    if len(attacks) == 0:
+
+        ax.text(
+            0.5,
+            0.5,
+            "No Attacks Detected",
+            ha="center"
+        )
+
+        return fig
+
+    counts = attacks["attack_type"].value_counts()
 
     counts.plot(
         kind="bar",
@@ -79,6 +91,8 @@ def attack_chart():
     ax.set_title(
         "Attack Distribution"
     )
+
+    ax.set_ylabel("Count")
 
     return fig
 
@@ -111,6 +125,10 @@ with gr.Blocks() as demo:
         label="Recent Predictions"
     )
 
+    attack_plot = gr.Plot(
+    label="Attack Distribution Chart"
+    )
+
     refresh_btn.click(
         fn=load_data,
         outputs=[
@@ -118,11 +136,30 @@ with gr.Blocks() as demo:
             total_packets,
             total_attacks,
             attack_table,
-            recent_table,
-            attack_chart,
-            outputs=attack_plot
+            recent_table
         ]
     )
+
+    refresh_btn.click(
+    fn=attack_chart,
+    outputs=attack_plot
+    )
+
+demo.load(
+    fn=load_data,
+    outputs=[
+        current_file,
+        total_packets,
+        total_attacks,
+        attack_table,
+        recent_table
+    ]
+)
+
+demo.load(
+    fn=attack_chart,
+    outputs=attack_plot
+)
 
 demo.launch(
     server_name="0.0.0.0",
