@@ -56,6 +56,31 @@ def load_data():
         attack_counts,
         recent
     )
+def attack_chart():
+
+    csv_file = get_latest_csv()
+
+    if csv_file is None:
+        return None
+
+    df = pd.read_csv(csv_file)
+
+    attacks = df[df["prediction"] == "Attack"]
+
+    counts = attacks["attack_type"].value_counts()
+
+    fig, ax = plt.subplots()
+
+    counts.plot(
+        kind="bar",
+        ax=ax
+    )
+
+    ax.set_title(
+        "Attack Distribution"
+    )
+
+    return fig
 
 
 with gr.Blocks() as demo:
@@ -93,7 +118,9 @@ with gr.Blocks() as demo:
             total_packets,
             total_attacks,
             attack_table,
-            recent_table
+            recent_table,
+            attack_chart,
+            outputs=attack_plot
         ]
     )
 
