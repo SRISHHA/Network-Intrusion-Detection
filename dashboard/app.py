@@ -4,17 +4,10 @@ import os
 
 CSV_FILE = "logs/predictions.csv"
 
-
 def load_data():
 
     if not os.path.exists(CSV_FILE):
-
-        return (
-            0,
-            0,
-            pd.DataFrame(),
-            pd.DataFrame()
-        )
+        return 0, 0, pd.DataFrame(), pd.DataFrame()
 
     df = pd.read_csv(CSV_FILE)
 
@@ -44,20 +37,14 @@ def load_data():
         recent
     )
 
-
 with gr.Blocks() as demo:
 
-    gr.Markdown(
-        "# 🚨 Real-Time Intrusion Detection Dashboard"
-    )
+    gr.Markdown("# 🚨 Real-Time Intrusion Detection Dashboard")
 
-    total_packets = gr.Number(
-        label="Total Packets"
-    )
+    btn = gr.Button("Refresh")
 
-    total_attacks = gr.Number(
-        label="Total Attacks"
-    )
+    total_packets = gr.Number(label="Total Packets")
+    total_attacks = gr.Number(label="Total Attacks")
 
     attack_table = gr.Dataframe(
         label="Attack Distribution"
@@ -67,15 +54,14 @@ with gr.Blocks() as demo:
         label="Recent Predictions"
     )
 
-    demo.load(
+    btn.click(
         load_data,
         outputs=[
             total_packets,
             total_attacks,
             attack_table,
             recent_table
-        ],
-        every=2
+        ]
     )
 
 demo.launch(
