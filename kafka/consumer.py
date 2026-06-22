@@ -81,7 +81,7 @@ os.makedirs("logs", exist_ok=True)
 
 csv_file = (
     f"logs/predictions_"
-    f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    f"{datetime.now().strftime('%Y-%m-%d_%I-%M-%S_%p')}.csv"
 )
 
 if not os.path.exists(csv_file):
@@ -178,18 +178,11 @@ for msg in consumer:
         # Save to CSV
         # --------------------------
 
-        result = pd.DataFrame(
-            [{
-                "timestamp":
-                datetime.now(),
-
-                "prediction":
-                prediction,
-
-                "attack_type":
-                attack_name
-            }]
-        )
+        result = pd.DataFrame([{
+        "timestamp": timestamp,
+        "prediction": prediction,
+        "attack_type": attack_name
+        }])
 
         result.to_csv(
             csv_file,
