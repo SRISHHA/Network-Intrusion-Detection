@@ -178,7 +178,7 @@ for msg in consumer:
         # --------------------------
 
         print(
-            f"[{datetime.now()}] "
+            f"[{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}] "
             f"{prediction} -> "
             f"{attack_name}"
         )
