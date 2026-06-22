@@ -188,8 +188,7 @@ for msg in consumer:
         # --------------------------
 
         result = pd.DataFrame([{
-        "timestamp": f"{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}"
-        ),
+        "timestamp": f"{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}",
         "prediction": prediction,
         "attack_type": attack_name
         }])
