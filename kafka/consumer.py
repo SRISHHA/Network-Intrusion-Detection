@@ -12,8 +12,13 @@ from kafka import KafkaConsumer
 
 binary_model = joblib.load("models/xgb_binary.pkl")
 multi_model = joblib.load("models/xgb_multi.pkl")
+binary_scaler = joblib.load(
+    "models/binary_scaler.pkl"
+)
 
-scaler = joblib.load("models/scaler.pkl")
+multiclass_scaler = joblib.load(
+    "models/multiclass_scaler.pkl"
+)
 
 encoders = joblib.load("models/encoders.pkl")
 
@@ -117,15 +122,15 @@ for msg in consumer:
         # Scale
         # --------------------------
 
-        X = scaler.transform(df)
+        X_binary = binary_scaler.transform(df)
+        X_multi = multiclass_scaler.transform(df)
+
 
         # --------------------------
         # Binary Prediction
         # --------------------------
 
-        binary_pred = binary_model.predict(
-            X
-        )[0]
+        binary_pred = binary_model.predict(X_binary)[0]
 
         # --------------------------
         # Multiclass Prediction
@@ -138,8 +143,10 @@ for msg in consumer:
 
         else:
 
+            
+
             attack_pred = multi_model.predict(
-                X
+                X_multi
             )[0]
 
             attack_name = (
