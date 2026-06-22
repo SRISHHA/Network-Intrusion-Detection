@@ -179,7 +179,9 @@ for msg in consumer:
         # --------------------------
 
         result = pd.DataFrame([{
-        "timestamp": timestamp,
+        "timestamp": datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S"
+        ),
         "prediction": prediction,
         "attack_type": attack_name
         }])

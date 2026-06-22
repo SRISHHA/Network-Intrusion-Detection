@@ -1,15 +1,34 @@
+import os
+import glob
 import pandas as pd
 import gradio as gr
-import os
 
-CSV_FILE = "logs/predictions.csv"
+
+def get_latest_csv():
+
+    files = glob.glob("logs/*.csv")
+
+    if not files:
+        return None
+
+    return max(files, key=os.path.getctime)
+
 
 def load_data():
 
-    if not os.path.exists(CSV_FILE):
-        return 0, 0, pd.DataFrame(), pd.DataFrame()
+    csv_file = get_latest_csv()
 
-    df = pd.read_csv(CSV_FILE)
+    if csv_file is None:
+
+        return (
+            "No file",
+            0,
+            0,
+            pd.DataFrame(),
+            pd.DataFrame()
+        )
+
+    df = pd.read_csv(csv_file)
 
     total_packets = len(df)
 
@@ -31,6 +50,7 @@ def load_data():
     recent = df.tail(20)
 
     return (
+        os.path.basename(csv_file),
         total_packets,
         total_attacks,
         attack_counts,
@@ -40,12 +60,23 @@ def load_data():
 
 with gr.Blocks() as demo:
 
-    gr.Markdown("# 🚨 Real-Time Intrusion Detection Dashboard")
+    gr.Markdown(
+        "# 🚨 Network Intrusion Detection Dashboard"
+    )
 
     refresh_btn = gr.Button("Refresh")
 
-    total_packets = gr.Number(label="Total Packets")
-    total_attacks = gr.Number(label="Total Attacks")
+    current_file = gr.Textbox(
+        label="Current Log File"
+    )
+
+    total_packets = gr.Number(
+        label="Total Packets"
+    )
+
+    total_attacks = gr.Number(
+        label="Total Attacks"
+    )
 
     attack_table = gr.Dataframe(
         label="Attack Distribution"
@@ -58,6 +89,7 @@ with gr.Blocks() as demo:
     refresh_btn.click(
         fn=load_data,
         outputs=[
+            current_file,
             total_packets,
             total_attacks,
             attack_table,
