@@ -20,16 +20,16 @@ df = df.drop(columns=["label", "attack_cat"], errors="ignore")
 
 print("Starting dataset stream...")
 
-# Send only the first 50 records
-for count, (_, row) in enumerate(df.head(50).iterrows(), start=1):
+# Send only the first 25 records
+for count, (_, row) in enumerate(df.head(25).iterrows(), start=1):
     producer.send(
         "network_logs",
         row.to_dict()
     )
 
     print(f"Sent record #{count}")
-    time.sleep(0.5)
+    time.sleep(0.7)
 
 producer.flush()
 
-print("Successfully sent 50 records.")
+print("Successfully sent 25 records.")
