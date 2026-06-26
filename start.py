@@ -1,22 +1,43 @@
 import subprocess
 import time
+import signal
 
-# Start Producer
-producer = subprocess.Popen(["python", "kafka/producer.py"])
+processes = []
 
-# Give producer time to connect to Kafka
-time.sleep(6)
+try:
+    print("Starting Consumer...")
+    consumer = subprocess.Popen(["python", "kafka/consumer.py"])
+    processes.append(consumer)
 
-# Start Consumer
-consumer = subprocess.Popen(["python", "kafka/consumer.py"])
+    # Give consumer time to connect to Kafka
+    time.sleep(8)
 
-# Give consumer time to initialize
-time.sleep(2)
+    print("Starting Dashboard...")
+    dashboard = subprocess.Popen(["python", "dashboard/app.py"])
+    processes.append(dashboard)
 
-# Start Dashboard
-dashboard = subprocess.Popen(["python", "dashboard/app.py"])
+    # Give dashboard time to initialize
+    time.sleep(3)
 
-# Wait for all processes
-producer.wait()
-consumer.wait()
-dashboard.wait()
+    print("Starting Producer...")
+    producer = subprocess.Popen(["python", "kafka/producer.py"])
+    processes.append(producer)
+
+    # Wait until producer finishes
+    producer.wait()
+
+    print("Producer finished.")
+
+    # Keep consumer and dashboard running
+    consumer.wait()
+    dashboard.wait()
+
+except KeyboardInterrupt:
+    print("\nStopping all processes...")
+
+finally:
+    for p in processes:
+        if p.poll() is None:
+            p.terminate()
+
+    print("All processes stopped.")

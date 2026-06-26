@@ -63,7 +63,7 @@ consumer = KafkaConsumer(
     "kafka-network2026-srishha2001-bd1.i.aivencloud.com:25963",
 
     security_protocol="SSL",
-
+    auto_offset_reset="earliest",
     ssl_cafile="certs/ca.pem",
     ssl_certfile="certs/service.cert",
     ssl_keyfile="certs/service.key",
