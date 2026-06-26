@@ -1,7 +1,12 @@
-import pandas as pd
 import json
 import time
+import pandas as pd
+
 from kafka import KafkaProducer
+
+# ==================================
+# Kafka Producer
+# ==================================
 
 producer = KafkaProducer(
     bootstrap_servers="kafka-network2026-srishha2001-bd1.i.aivencloud.com:25963",
@@ -9,27 +14,55 @@ producer = KafkaProducer(
     ssl_cafile="certs/ca.pem",
     ssl_certfile="certs/service.cert",
     ssl_keyfile="certs/service.key",
-    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+    value_serializer=lambda value: json.dumps(value).encode("utf-8")
 )
 
-# Read dataset
-df = pd.read_csv("data/UNSW_NB15_training-set.csv")
+# ==================================
+# Load Dataset
+# ==================================
 
-# Remove unwanted columns
-df = df.drop(columns=["label", "attack_cat"], errors="ignore")
+DATASET_PATH = "data/UNSW_NB15_training-set.csv"
 
-print("Starting dataset stream...")
+df = pd.read_csv(DATASET_PATH)
 
-# Send only the first 50 records
-for count, (_, row) in enumerate(df.head(50).iterrows(), start=1):
+# Remove labels (used only during training)
+df = df.drop(
+    columns=["label", "attack_cat"],
+    errors="ignore"
+)
+
+print(f"Loaded {len(df)} records.")
+print("Starting dataset stream...\n")
+
+# ==================================
+# Stream Dataset to Kafka
+# ==================================
+
+TOTAL_RECORDS = 50
+DELAY = 0.7  # seconds
+
+for index, row in df.head(TOTAL_RECORDS).iterrows():
+
+    # Convert row to dictionary
+    message = row.to_dict()
+
+    # Add unique record ID
+    message["id"] = index + 1
+
     producer.send(
         "network_logs",
-        row.to_dict()
+        value=message
     )
 
-    print(f"Sent record #{count}")
-    time.sleep(0.7)
+    print(f"Sent Record ID: {message['id']}")
+
+    time.sleep(DELAY)
+
+# ==================================
+# Finish
+# ==================================
 
 producer.flush()
+producer.close()
 
-print("Successfully sent 50 records.")
+print(f"\nSuccessfully streamed {TOTAL_RECORDS} records.")

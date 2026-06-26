@@ -38,9 +38,9 @@ def load_data():
     )
 
     attack_counts = (
-        df["attack_type"]
-        .value_counts()
-        .reset_index()
+    df[df["prediction"] == "Attack"]["attack_type"]
+    .value_counts()
+    .reset_index()
     )
 
     attack_counts.columns = [
@@ -48,7 +48,19 @@ def load_data():
         "Count"
     ]
 
-    recent = df.tail(20)
+    # Display latest 20 predictions with ID
+    recent = (
+        df[
+            [
+                "id",
+                "timestamp",
+                "prediction",
+                "attack_type"
+            ]
+        ]
+        .tail(20)
+        .reset_index(drop=True)
+    )
 
     return (
         os.path.basename(csv_file),
@@ -57,6 +69,7 @@ def load_data():
         attack_counts,
         recent
     )
+
 import plotly.express as px
 
 
@@ -122,7 +135,13 @@ with gr.Blocks() as demo:
     )
 
     recent_table = gr.Dataframe(
-        label="Recent Predictions"
+    headers=[
+        "ID",
+        "Timestamp",
+        "Prediction",
+        "Attack Type"
+    ],
+    label="Recent Predictions"
     )
 
     attack_plot = gr.Plot(

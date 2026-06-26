@@ -3,12 +3,9 @@ import json
 import joblib
 import pandas as pd
 
-from datetime import datetime
 from kafka import KafkaConsumer
 from datetime import datetime
 from zoneinfo import ZoneInfo
-
-
 
 # ==================================
 # Load Models
@@ -16,19 +13,12 @@ from zoneinfo import ZoneInfo
 
 binary_model = joblib.load("models/xgb_binary.pkl")
 multi_model = joblib.load("models/xgb_multi.pkl")
-binary_scaler = joblib.load(
-    "models/binary_scaler.pkl"
-)
 
-multiclass_scaler = joblib.load(
-    "models/multiclass_scaler.pkl"
-)
+binary_scaler = joblib.load("models/binary_scaler.pkl")
+multiclass_scaler = joblib.load("models/multiclass_scaler.pkl")
 
 encoders = joblib.load("models/encoders.pkl")
-
-attack_encoder = joblib.load(
-    "models/attack_encoder.pkl"
-)
+attack_encoder = joblib.load("models/attack_encoder.pkl")
 
 print("Models loaded successfully")
 
@@ -65,8 +55,7 @@ consumer = KafkaConsumer(
     ssl_certfile="certs/service.cert",
     ssl_keyfile="certs/service.key",
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-
-    auto_offset_reset="latest",   # Read only new messages
+    auto_offset_reset="latest",
     group_id="network_ids",
     enable_auto_commit=True
 )
@@ -74,33 +63,62 @@ consumer = KafkaConsumer(
 print("Waiting for messages...")
 
 # ==================================
-# Create logs folder
+# Create Log File
 # ==================================
 
 os.makedirs("logs", exist_ok=True)
 
-ist_time = datetime.now(
-    ZoneInfo("Asia/Kolkata")
-)
+start_time = datetime.now(ZoneInfo("Asia/Kolkata"))
 
 csv_file = (
     f"logs/predictions_"
-    f"{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    f"{start_time.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
 )
-
-timestamp = datetime.now(
-    ZoneInfo("Asia/Kolkata")
-).strftime("%Y-%m-%d %H:%M:%S")
 
 if not os.path.exists(csv_file):
 
-    pd.DataFrame(
-        columns=[
-            "timestamp",
-            "prediction",
-            "attack_type"
-        ]
-    ).to_csv(csv_file, index=False)
+    pd.DataFrame(columns=[
+        "id",
+        "timestamp",
+        "prediction",
+        "attack_type"
+    ]).to_csv(csv_file, index=False)
+
+
+# ==================================
+# Prediction Function
+# ==================================
+
+def predict_network_log(data):
+
+    df = pd.DataFrame([data])
+
+    # Encode categorical features
+    for col, encoder in encoders.items():
+        if col in df.columns:
+            df[col] = encoder.transform(df[col])
+
+    # Arrange feature order
+    df = df[FEATURE_COLUMNS]
+
+    # Scale
+    X_binary = binary_scaler.transform(df)
+    X_multi = multiclass_scaler.transform(df)
+
+    # Binary prediction
+    binary_pred = binary_model.predict(X_binary)[0]
+
+    if binary_pred == 0:
+        return "Normal", "Normal"
+
+    attack_pred = multi_model.predict(X_multi)[0]
+
+    attack_name = attack_encoder.inverse_transform(
+        [attack_pred]
+    )[0]
+
+    return "Attack", attack_name
+
 
 # ==================================
 # Consume Messages
@@ -112,94 +130,35 @@ for msg in consumer:
 
         data = msg.value
 
-        df = pd.DataFrame([data])
+        # If producer sends an ID, use it.
+        # Otherwise use Kafka offset.
+        record_id = data.get("id", msg.offset)
 
-        # --------------------------
-        # Encode categorical columns
-        # --------------------------
+        current_time = datetime.now(
+            ZoneInfo("Asia/Kolkata")
+        ).strftime("%Y-%m-%d %H:%M:%S")
 
-        for col, encoder in encoders.items():
-
-            if col in df.columns:
-
-                df[col] = encoder.transform(
-                    df[col]
-                )
-
-        # --------------------------
-        # Correct feature order
-        # --------------------------
-
-        df = df[FEATURE_COLUMNS]
-
-        # --------------------------
-        # Scale
-        # --------------------------
-
-        X_binary = binary_scaler.transform(df)
-        X_multi = multiclass_scaler.transform(df)
-
-
-        # --------------------------
-        # Binary Prediction
-        # --------------------------
-
-        binary_pred = binary_model.predict(X_binary)[0]
-
-        # --------------------------
-        # Multiclass Prediction
-        # --------------------------
-
-        if binary_pred == 0:
-
-            prediction = "Normal"
-            attack_name = "Normal"
-
-        else:
-
-            
-
-            attack_pred = multi_model.predict(
-                X_multi
-            )[0]
-
-            attack_name = (
-                attack_encoder
-                .inverse_transform(
-                    [attack_pred]
-                )[0]
-            )
-
-            prediction = "Attack"
-
-        # --------------------------
-        # Print
-        # --------------------------
+        prediction, attack_name = predict_network_log(data)
 
         print(
-            f"[{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}] "
-            f"{prediction} -> "
-            f"{attack_name}"
+            f"[ID: {record_id}] "
+            f"[{current_time}] "
+            f"{prediction} -> {attack_name}"
         )
 
-        # --------------------------
-        # Save to CSV
-        # --------------------------
-
         result = pd.DataFrame([{
-        "timestamp": f"{ist_time.strftime('%Y-%m-%d_%H-%M-%S')}",
-        "prediction": prediction,
-        "attack_type": attack_name
+            "id": record_id,
+            "timestamp": current_time,
+            "prediction": prediction,
+            "attack_type": attack_name
         }])
 
         result.to_csv(
             csv_file,
             mode="a",
-            index=False,
-            header=False
+            header=False,
+            index=False
         )
 
     except Exception as e:
-
-        print("ERROR:")
-        print(e)
+        print("ERROR:", e)
