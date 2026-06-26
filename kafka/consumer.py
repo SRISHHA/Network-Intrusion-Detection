@@ -59,17 +59,16 @@ FEATURE_COLUMNS = [
 
 consumer = KafkaConsumer(
     "network_logs",
-    bootstrap_servers=
-    "kafka-network2026-srishha2001-bd1.i.aivencloud.com:25963",
-
+    bootstrap_servers="...",
     security_protocol="SSL",
-    auto_offset_reset="earliest",
-    ssl_cafile="certs/ca.pem",
-    ssl_certfile="certs/service.cert",
-    ssl_keyfile="certs/service.key",
+    ssl_cafile="...",
+    ssl_certfile="...",
+    ssl_keyfile="...",
+    value_deserializer=lambda m: json.loads(m.decode("utf-8")),
 
-    value_deserializer=lambda m:
-    json.loads(m.decode("utf-8"))
+    auto_offset_reset="latest",   # Read only new messages
+    group_id="network_ids",
+    enable_auto_commit=True
 )
 
 print("Waiting for messages...")
