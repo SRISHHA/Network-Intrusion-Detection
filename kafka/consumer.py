@@ -61,9 +61,9 @@ consumer = KafkaConsumer(
     "network_logs",
     bootstrap_servers="...",
     security_protocol="SSL",
-    ssl_cafile="...",
-    ssl_certfile="...",
-    ssl_keyfile="...",
+    ssl_cafile="certs/ca.pem",
+    ssl_certfile="certs/service.cert",
+    ssl_keyfile="certs/service.key",
     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
 
     auto_offset_reset="latest",   # Read only new messages
