@@ -48,13 +48,12 @@ def load_data():
         "Count"
     ]
 
-    # Display latest 20 predictions with ID
+    # Display only detected attacks
     recent = (
-        df[
+        df[df["prediction"] == "Attack"][
             [
                 "id",
                 "timestamp",
-                "prediction",
                 "attack_type"
             ]
         ]
@@ -135,13 +134,12 @@ with gr.Blocks() as demo:
     )
 
     recent_table = gr.Dataframe(
-    headers=[
-        "ID",
-        "Timestamp",
-        "Prediction",
-        "Attack Type"
-    ],
-    label="Recent Predictions"
+        headers=[
+            "ID",
+            "Timestamp",
+            "Attack Type"
+        ],
+        label="Recent Detected Attacks"
     )
 
     attack_plot = gr.Plot(
