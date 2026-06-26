@@ -12,32 +12,24 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
+# Read dataset
 df = pd.read_csv("data/UNSW_NB15_training-set.csv")
 
-df = df.drop(
-    columns=["label", "attack_cat"],
-    errors="ignore"
-)
+# Remove unwanted columns
+df = df.drop(columns=["label", "attack_cat"], errors="ignore")
 
-count = 0
+print("Starting dataset stream...")
 
-while True:
+# Send only the first 50 records
+for count, (_, row) in enumerate(df.head(50).iterrows(), start=1):
+    producer.send(
+        "network_logs",
+        row.to_dict()
+    )
 
-    print("Starting dataset stream...")
+    print(f"Sent record #{count}")
+    time.sleep(0.5)
 
-    for _, row in df.iterrows():
+producer.flush()
 
-        producer.send(
-            "network_logs",
-            row.to_dict()
-        )
-
-        count += 1
-
-        print(f"Sent record #{count}")
-
-        time.sleep(0.5)
-
-    producer.flush()
-
-    print("Dataset completed. Restarting...")
+print("Successfully sent 50 records.")
