@@ -1,15 +1,22 @@
 import subprocess
 import time
 
-consumer = subprocess.Popen(
-    ["python", "kafka/consumer.py"]
-)
+# Start Producer
+producer = subprocess.Popen(["python", "kafka/producer.py"])
 
-time.sleep(5)
+# Give producer time to connect to Kafka
+time.sleep(2)
 
-dashboard = subprocess.Popen(
-    ["python", "dashboard/app.py"]
-)
+# Start Consumer
+consumer = subprocess.Popen(["python", "kafka/consumer.py"])
 
+# Give consumer time to initialize
+time.sleep(2)
+
+# Start Dashboard
+dashboard = subprocess.Popen(["python", "dashboard/app.py"])
+
+# Wait for all processes
+producer.wait()
 consumer.wait()
 dashboard.wait()
