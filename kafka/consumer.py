@@ -59,7 +59,7 @@ FEATURE_COLUMNS = [
 
 consumer = KafkaConsumer(
     "network_logs",
-    bootstrap_servers="...",
+    bootstrap_servers="kafka-network2026-srishha2001-bd1.i.aivencloud.com:25963",
     security_protocol="SSL",
     ssl_cafile="certs/ca.pem",
     ssl_certfile="certs/service.cert",
