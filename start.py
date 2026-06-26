@@ -5,7 +5,7 @@ import time
 producer = subprocess.Popen(["python", "kafka/producer.py"])
 
 # Give producer time to connect to Kafka
-time.sleep(2)
+time.sleep(6)
 
 # Start Consumer
 consumer = subprocess.Popen(["python", "kafka/consumer.py"])
