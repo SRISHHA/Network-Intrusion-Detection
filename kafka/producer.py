@@ -9,7 +9,7 @@ from kafka import KafkaProducer
 # ==================================
 
 producer = KafkaProducer(
-    bootstrap_servers="kafka-network2026-srishha2001-bd1.i.aivencloud.com:25963",
+    bootstrap_servers="kafka-8001fa1-srishha25-41c8.d.aivencloud.com:20477",
     security_protocol="SSL",
     ssl_cafile="certs/ca.pem",
     ssl_certfile="certs/service.cert",
