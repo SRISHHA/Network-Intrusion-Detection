@@ -165,7 +165,7 @@ This creates a complete real-time prediction pipeline.
 
 # ☁️ Kafka Deployment
 
-Apache Kafka was hosted using a cloud-based Kafka service (Event Cloud) to simulate distributed real-time message streaming.
+Apache Kafka was hosted using a cloud-based Kafka service (Aiven Cloud) to simulate distributed real-time message streaming.
 
 The streaming architecture separates data producers and consumers similar to modern event-driven systems used in production.
 
